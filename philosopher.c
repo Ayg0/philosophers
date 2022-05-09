@@ -6,81 +6,105 @@
 /*   By: ted-dafi <ted-dafi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/05 11:28:03 by ted-dafi          #+#    #+#             */
-/*   Updated: 2022/05/06 11:03:17 by ted-dafi         ###   ########.fr       */
+/*   Updated: 2022/05/09 13:47:30 by ted-dafi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
-int	init_data(t_data *data, char **av)
+int	init_locks(t_data *data)
 {
-	data->philo.max_num = ft_atoi(av[1]);
+	int	i;
+
+	i = -1;
+	while (++i < data->philo.max_num)
+		pthread_mutex_init(&data->philo.forks[i], NULL);
+	return (0);
+}
+
+int	init_num(t_data *data, char **av, int *flag)
+{
+	data->philo.max_num = ft_atoi(av[1], flag);
+	data->times.time_to_die = ft_atoi(av[2], flag);
+	data->times.time_to_eat = ft_atoi(av[3], flag);
+	data->times.time_to_sleep = ft_atoi(av[4], flag);
+	if (av[5])
+		data->philo.max_eat = ft_atoi(av[5], flag);
+	return (*flag);
+}
+
+int	init_data(t_data *data, char **av, int *flag)
+{
+	data->times.start_time = 0;
+	if (init_num(data, av, flag) == -2)
+		return (*flag);
 	data->philo.philos = (pthread_t *)ft_calloc(data->philo.max_num, sizeof(pthread_t));
-	data->philo.forks = (int *)ft_calloc(data->philo.max_num, sizeof(int));
+	data->times.deadline = (ulg *)ft_calloc(data->philo.max_num, sizeof(ulg));
+	data->maid.num_to_eat = (int *)ft_calloc(data->philo.max_num, sizeof(int));
+	data->philo.forks = (pthread_mutex_t *)ft_calloc(data->philo.max_num, sizeof(pthread_mutex_t));
 	data->maid.maid = (pthread_t *)ft_calloc(1, sizeof(pthread_t));
 	data->maid.state_of_prog = 1;
-	pthread_mutex_init(&data->lock, NULL);
-	data->times.time_to_die = ft_atoi(av[2]);
-	data->times.time_to_eat = ft_atoi(av[3]);
-	data->times.time_to_sleep = ft_atoi(av[4]);
-	data->updated_num = 1;
+	init_locks(data);
 	data->stat_of_num = 0;
 	return (0);
 }
 
-int	check_forks(t_data *data, int l_fork, int r_fork)
+int get_forks(t_data *data,int num, int l_fork, int r_fork)
 {
-	if (data->philo.forks[l_fork] == 0 && data->philo.forks[r_fork] == 0)
-	{
-		data->philo.forks[l_fork] = 1;
-		data->philo.forks[r_fork] = 1;
-		return (0);
-	}
-	return (1);
+	pthread_mutex_lock(&data->philo.forks[l_fork]);
+	print_info(get_time() - data->times.start_time, num, "has taking a fork", data->maid.state_of_prog);
+	while(l_fork == r_fork);
+	pthread_mutex_lock(&data->philo.forks[r_fork]);
+	print_info(get_time() - data->times.start_time, num, "has taking a fork", data->maid.state_of_prog);
+	return (0);
 }
 
-ulg get_time()
-{
-  struct timeval tv;
+// int	print_error(int e_num)
+// {
+// 	return (((!e_num) && (write(2, "Error, Wrong number of arguments !\n", 36))) || \
+// 	((e_num == -2) && (write(2, "Error, Wrong argument format!\n", 36))));
+// }
 
-  gettimeofday(&tv, NULL);
-  return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
-}
-
-int print_info(ulg time, int num, char *s)
+int put_forks(t_data *data, int l_fork, int r_fork)
 {
-  printf("%lu %d %s\n", time, num, s);
-  return (0);
+	pthread_mutex_unlock(&data->philo.forks[r_fork]);
+	pthread_mutex_unlock(&data->philo.forks[l_fork]);
+	return (0);
 }
 
 int eat(t_data *data,int num, int l_fork, int r_fork)
 {
-  print_info(get_time(), num, "has taking a fork");
-  print_info(get_time(), num, "has taking a fork");
-  print_info(get_time(), num, "is eating");
-  usleep(data->times.time_to_eat * 1000);
-  data->philo.forks[l_fork] = 0;
-  data->philo.forks[r_fork] = 0;
-  return (0);
+	if (!data->maid.state_of_prog)
+		return (1);
+	get_forks(data, num, l_fork, r_fork);
+	print_info(get_time() - data->times.start_time, num, "is eating", data->maid.state_of_prog);
+	data->maid.num_to_eat[num - 1]++;
+	data->times.deadline[num - 1] = get_time();
+	ft_sleep(data->times.time_to_eat);
+	put_forks(data, l_fork, r_fork);
+	return (0);
 }
 
 int go_sleep(t_data *data, int num)
 {
-  print_info(get_time(), num, "is sleeping");
-  usleep(data->times.time_to_sleep);
-  return (0);
+	if (!data->maid.state_of_prog)
+		return (1);
+  	print_info(get_time() - data->times.start_time, num, "is sleeping", data->maid.state_of_prog);
+  	ft_sleep(data->times.time_to_sleep);
+  	return (0);
 }
 
-int think(int num)
+int think(t_data *data, int num)
 {
-  print_info(get_time(), num, "is thinking");
-  return (0);
+	if (!data->maid.state_of_prog)
+		return (1);
+  	print_info(get_time() - data->times.start_time, num, "is thinking", data->maid.state_of_prog);
+  	return (0);
 }
 
 int	life(t_data *data)
 {
 	int	num;
-	int	can_eat;
 	int	forks[2];
 
 	/*
@@ -89,69 +113,87 @@ int	life(t_data *data)
 		- sleep
 		- think
 	*/
-	int d = 0;
 	num = data->updated_num;
 	data->stat_of_num = 1;
-    forks[0] = ((num == 1) * data->philo.max_num) + ((num != 1) * (num - 1));
-    forks[1] = ((num == data->philo.max_num) * 1) + ((num != data->philo.max_num) * num);
-	//while(data->updated_num != -1);
-	while(data->maid.state_of_prog == 1)
+	forks[0] = ((num == 1) * data->philo.max_num) + ((num != 1) * (num - 1));
+	forks[1] = num;
+	while(data->maid.state_of_prog)
 	{
-		can_eat = 0;
-		while(!can_eat)
-		{
-			pthread_mutex_lock(&data->lock);
-			can_eat = !check_forks(data, forks[0], forks[1]);
-			pthread_mutex_unlock(&data->lock);
-		}
 		eat(data, num, forks[0], forks[1]);
   		go_sleep(data, num);
-  		think(num);
-		if (++d == 15)
-			data->maid.state_of_prog = 0;
+  		think(data, num);
 	}
 	return (0);
 }
 
 int	create_threads(t_data *data)
 {
-	while(data->updated_num < data->philo.max_num + 1)
+	data->times.start_time = get_time();
+	data->updated_num = 2;
+	while(data->updated_num <= data->philo.max_num)
 	{
-		pthread_create(&data->philo.philos[data->updated_num - 1], NULL, (void *) life, data);
+		pthread_create(&data->philo.philos[data->updated_num], NULL, (void *) life, data);
 		while(data->stat_of_num == 0);
 		data->stat_of_num = 0;
-		data->updated_num++;
+		data->updated_num += 2;
 	}
-	//pthread_create(data->maid.maid, NULL, (void *) take_care, data);
-	data->updated_num = -1;
+	data->updated_num = 1;
+	usleep(250);
+	while(data->updated_num <= data->philo.max_num)
+	{
+		pthread_create(&data->philo.philos[data->updated_num], NULL, (void *) life, data);
+		while(data->stat_of_num == 0);
+		data->stat_of_num = 0;
+		data->updated_num += 2;
+	}
+	pthread_create(data->maid.maid, NULL, (void *) take_care, data);
 	return (0);
 }
 
 int	join_threads(t_data *data)
 {
-  while(++data->updated_num < data->philo.max_num)
-    pthread_join(data->philo.philos[data->updated_num], NULL);
+  int i;
+
+	i = -1;
+	while(++i < data->philo.max_num)
+		pthread_join(data->philo.philos[i], NULL);
+	pthread_join(*data->maid.maid, NULL);
 	return (0);
 }
 
-int	clear_data()
+int	clear_data(t_data *data, int e_flag)
 {
-	
+	int	i;
+
+	i = -1;
+	while (++i < data->philo.max_num)
+	{
+		if (!e_flag)
+			pthread_mutex_destroy(&data->philo.forks[i]);
+	}
 	return (0);
 }
 
 int	main(int ac, char **av)
 {
-	t_data	data;
+	t_data	*data;
+	int		e_flag;
+
+	e_flag = 0;
+	data = ft_calloc(1 , sizeof(t_data));
 	/*
 		- init data.
 		- create threads.
 		- join threads.
 		- clear data.
 	*/
-  	(void)ac;
-	init_data(&data, av);
-	create_threads(&data);
-	join_threads(&data);
-	clear_data();
+	if (ac != 5 && ac != 6)
+		return (write(2, "Error, Wrong number of arguments !\n", 36));
+	if (ac == 6)
+		data->maid.flag = 1;
+	if (init_data(data, av, &e_flag))
+		return (write(2, "Error, bad parameters !\n", 24));
+	!e_flag && create_threads(data);
+	!e_flag && join_threads(data);
+	clear_data(data, e_flag);
 }

@@ -6,7 +6,7 @@
 /*   By: ted-dafi <ted-dafi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/05 11:31:06 by ted-dafi          #+#    #+#             */
-/*   Updated: 2022/05/05 11:31:54 by ted-dafi         ###   ########.fr       */
+/*   Updated: 2022/05/09 13:38:38 by ted-dafi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,31 +19,29 @@ void    *ft_calloc(size_t count, size_t size)
 
         i = count * size;
         b = malloc(i);
-        if (b == NULL)
-                exit (write(2, "Error, allocation Error.\n", 26));
+        if (!b)
+                return (b);
         while (i)
                 ((char *)b)[--i] = 0;
         return (b);
 }
 
-int     ft_atoi(const char *str)
+int     ft_atoi(const char *str, int *flag)
 {
         int                             i;
         int                             sign;
-        unsigned long   num;
+        long   num;
 
         i = 0;
         sign = 1;
         num = 0;
         while ((str[i] >= 9 && str[i] <= 13) || str[i] == 32)
-        {
                 i++;
-        }
         if (str[i] == '+' || str[i] == '-')
         {
                 if (str[i] == '-')
                         sign *= -1;
-                i++;
+				i++;
         }
         while (str[i] >= '0' && str[i] <= '9')
         {
@@ -51,5 +49,33 @@ int     ft_atoi(const char *str)
                 num += str[i] - '0';
                 i++;
         }
-        return (num * sign);
+        if (num * sign <= 0)
+			*flag = -2;
+		return (num * sign);
+}
+
+int	ft_sleep(ulg time)
+{
+	ulg	first;
+
+	first = get_time();
+	usleep(time * 90 / 100);
+	while (get_time() - first < time)
+		usleep(100);
+	return (0);
+}
+
+ulg get_time()
+{
+  struct timeval tv;
+
+  gettimeofday(&tv, NULL);
+  return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
+}
+
+int print_info(int time, int num, char *s, int status)
+{
+	if (status)
+		printf("%d %d %s\n", time, num, s);
+	return (0);
 }
