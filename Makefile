@@ -4,7 +4,7 @@ NAME = philosophers
 
 CFLAGS = -g -pthread -Wall -Werror -Wextra
 
-SRCS = basic_functions.c philosopher.c takingcare.c
+SRCS = basic_functions.c philosophers.c
 
 OBJS = ${SRCS:.c=.o}
 

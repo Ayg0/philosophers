@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: ted-dafi <ted-dafi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/05/05 11:29:43 by ted-dafi          #+#    #+#             */
-/*   Updated: 2022/05/09 13:38:56 by ted-dafi         ###   ########.fr       */
+/*   Created: 2022/05/11 08:53:42 by ted-dafi          #+#    #+#             */
+/*   Updated: 2022/05/11 13:55:32 by ted-dafi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,58 +19,44 @@
 # include <pthread.h>
 # include <stdlib.h>
 
-/*
-	- each philo
-	- timing
-	- maid
-	- all
-*/
-
-typedef	unsigned long	ulg;
-
-typedef struct s_timing
-{
-	ulg		start_time;
-	ulg		time_to_eat;
-	ulg		time_to_die;
-	ulg		time_to_sleep;
-	ulg		*deadline;
-}	t_timing;
+typedef unsigned long ulg;
 
 typedef struct s_maid
 {
-	int			state_of_prog;
-	pthread_t	*maid;
-	int			flag;
+	pthread_t	maid;
 	int			*num_to_eat;
+	int			state_of_prog;
 }	t_maid;
 
-typedef struct s_philosopher
+typedef struct s_timing
 {
-	pthread_t		*philos;
-	pthread_mutex_t	*forks;
-	int				max_num;
-	int				max_eat;	
-}	t_philo;
+	ulg	start_time;
+	ulg	time_to_eat;
+	ulg	time_to_die;
+	ulg	time_to_sleep;
+}	t_timing;
 
 typedef struct s_data
 {
-	t_maid			maid;
-	t_philo			philo;
+	int				max_philo;
+	int				max_eat;
 	t_timing		times;
-	int				stat_of_num;
-	int				updated_num;
-	pthread_mutex_t	lock;
+	t_maid			maid;
+	pthread_mutex_t	*forks;
 }	t_data;
 
 
+typedef struct s_philosophers
+{
+	t_data		*data;
+	pthread_t	philo;
+	ulg			last_eat;
+	int			num;
+}	t_philo;
 
-int     ft_atoi(const char *str, int *flag);
 void    *ft_calloc(size_t count, size_t size);
-ulg		get_time();
+int     ft_atoi(const char *str, int *flag);
 int		ft_sleep(ulg time);
-int 	take_care(t_data *data);
-int 	print_info(int time, int num, char *s, int status);
-int 	take_care(t_data *data);
-int		all_ate(t_data *data);
+ulg		get_time();
+int		print_info(int time, int num, char *s, int status);
 #endif
