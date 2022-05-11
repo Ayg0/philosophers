@@ -6,7 +6,7 @@
 /*   By: ted-dafi <ted-dafi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/05 11:28:03 by ted-dafi          #+#    #+#             */
-/*   Updated: 2022/05/09 13:47:30 by ted-dafi         ###   ########.fr       */
+/*   Updated: 2022/05/11 07:59:35 by ted-dafi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,7 +138,7 @@ int	create_threads(t_data *data)
 		data->updated_num += 2;
 	}
 	data->updated_num = 1;
-	usleep(250);
+	ft_sleep(5000);
 	while(data->updated_num <= data->philo.max_num)
 	{
 		pthread_create(&data->philo.philos[data->updated_num], NULL, (void *) life, data);
