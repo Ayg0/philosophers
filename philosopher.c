@@ -6,7 +6,7 @@
 /*   By: ted-dafi <ted-dafi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/05 11:28:03 by ted-dafi          #+#    #+#             */
-/*   Updated: 2022/05/11 18:26:53 by ted-dafi         ###   ########.fr       */
+/*   Updated: 2022/05/12 13:25:46 by ted-dafi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,12 +64,6 @@ int get_forks(t_data *data,int num, int l_fork, int r_fork)
 	print_info(get_time() - data->times.start_time, num, "has taking a fork", data->maid.state_of_prog);
 	return (0);
 }
-
-// int	print_error(int e_num)
-// {
-// 	return (((!e_num) && (write(2, "Error, Wrong number of arguments !\n", 36))) || \
-// 	((e_num == -2) && (write(2, "Error, Wrong argument format!\n", 36))));
-// }
 
 int put_forks(t_data *data, int l_fork, int r_fork)
 {

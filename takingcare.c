@@ -6,7 +6,7 @@
 /*   By: ted-dafi <ted-dafi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/09 11:29:19 by ted-dafi          #+#    #+#             */
-/*   Updated: 2022/05/11 18:17:01 by ted-dafi         ###   ########.fr       */
+/*   Updated: 2022/05/12 13:37:25 by ted-dafi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ int	all_ate(t_data *data)
 	i = -1;
 	while (++i < data->philo.max_num)
 	{
-		if (data->maid.num_to_eat[i] != data->philo.max_eat)
+		if (data->maid.num_to_eat[i] < data->philo.max_eat)
 			break;
 	}
 	return (i == data->philo.max_num);

@@ -1,6 +1,6 @@
 CC = cc
 
-NAME = philosophers
+NAME = philosopher
 
 CFLAGS = -g -pthread -Wall -Werror -Wextra
 
