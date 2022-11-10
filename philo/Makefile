@@ -1,10 +1,10 @@
 CC = cc
 
-NAME = philosopher
+NAME = philo
 
 CFLAGS = -g -pthread -Wall -Werror -Wextra
 
-SRCS = basic_functions.c philosopher.c takingcare.c
+SRCS = basic_functions.c philosopher.c takingcare.c everyday_routine.c init_data.c
 
 OBJS = ${SRCS:.c=.o}
 
